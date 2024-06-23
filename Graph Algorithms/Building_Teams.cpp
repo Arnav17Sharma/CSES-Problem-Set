@@ -104,54 +104,24 @@ ll moduloMultiplication(ll a,ll b,ll mod){ll res = 0;a %= mod;while (b){if (b & 
 ll powermod(ll x, ll y, ll p){ll res = 1;x = x % p;if (x == 0) return 0;while (y > 0){if (y & 1)res = (res*x) % p;y = y>>1;x = (x*x) % p;}return res;}
 ll modinv(ll p,ll q){ll ex;ex=M-2;while (ex) {if (ex & 1) {p = (p * q) % M;}q = (q * q) % M;ex>>= 1;}return p;}
 
-bool dfs(int node, vector<vector<int>>& adj, vector<int>& vis) {
-    vis[node] = 1;
-    if(node == vis.size()-1) return true;
-    for(auto x: adj[node]) {
-        if(!vis[x]) {
-            if(dfs(x, adj, vis)) return true;
+int possible;
+
+void dfs(int current_node, int prev_node, vector<vector<int>>& adj, vector<int>& vis, vector<int>& team) {
+    for(auto x: adj[current_node]) {
+        if(x != prev_node) {
+            if(!vis[x]) {
+                vis[x] = 1;
+                team[x] = !team[current_node];
+                dfs(x, current_node, adj, vis, team);
+            }
+            else {
+                if(team[x] == team[current_node]){
+                    possible = 0;
+                }
+            }
         }
     }
 }
-
-void solve()
-{
-    int n, m;
-    cin >> n >> m;
-    vector<vector<int>> adj(n+1);
-    for(int i=0; i<m; i++) {
-        int temp1, temp2;
-        cin >> temp1 >> temp2;
-        adj[temp1].push_back(temp2);
-        adj[temp2].push_back(temp1);
-    }
-    queue<int> q;
-    vi vis(n+1), prev(n+1);
-    vi path;
-    q.push(1);
-    vis[1] = 1;
-    while(!q.empty()) {
-        int node = q.front(); q.pop();
-        for(auto i: adj[node]) {
-            if(vis[i]) continue;
-            vis[i] = vis[node] + 1;
-            prev[i] = node;
-            q.push(i);
-        }
-    }
-    if(!vis[n]) {cout << "IMPOSSIBLE\n" ; return ;}
-    int end = n;
-    while(end != 1) {
-        path.push_back(end);
-        end = prev[end];
-    }
-    path.push_back(1);
-    reverse(all(path));
-    cout << path.size() << endl;
-    for(auto x: path) cout << x << " ";
-    cout << endl;
-}
-
 
 int32_t main()
 {
@@ -161,8 +131,29 @@ int32_t main()
     #endif
     //Radhe Radhe
     //The comeback is always stronger than the setback.
-    
-    solve();
-    
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> adj(n+1);
+    for(int i=0; i<m; i++) {
+        int temp1, temp2;
+        cin >> temp1 >> temp2;
+        adj[temp1].push_back(temp2);
+        adj[temp2].push_back(temp1);
+    }
+    vector<int> vis(n+1);
+    vector<int> team(n+1, 0);
+    possible = 1;
+    for(int i=1; i<=n; i++) {
+        if(!vis[i]) {
+            vis[i] = 1;
+            dfs(i, 0, adj, vis, team);
+        }
+    }
+    if(possible == 0) {cout << "IMPOSSIBLE";}
+    else {
+        for(int i=1; i<=n; i++) {
+            if(team[i]==0){team[i] = 2;}
+            cout << team[i] << " ";}
+    }
     return 0;
 }
